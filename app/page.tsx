@@ -4,28 +4,34 @@ import React, { useState } from 'react';
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState(''); // [추가] 성함 상태
+  const [phone, setPhone] = useState(''); // [추가] 전화번호 상태
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return alert('이메일을 입력해주세요.');
+    // [검증] 필수 정보 확인
+    if (!name || !email || !phone) return alert('모든 정보를 정확히 입력해주세요.');
 
     setLoading(true);
     try {
-      // 치호 님의 n8n 웹훅 주소로 데이터 전송
       const response = await fetch('https://n8n.dayhope.day/webhook/dayhope-leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           email, 
+          name, // [추가] 데이터 전송
+          phone, // [추가] 데이터 전송
           source: 'dayhope_landing_v1',
           timestamp: new Date().toISOString() 
         }),
       });
 
       if (response.ok) {
-        alert('성공적으로 접수되었습니다! 가이드북을 메일로 보내드립니다.');
+        alert(`${name} 님, 성공적으로 접수되었습니다! 가이드북을 메일로 보내드립니다.`);
         setEmail('');
+        setName('');
+        setPhone('');
       } else {
         alert('전송에 실패했습니다. 잠시 후 다시 시도해주세요.');
       }
@@ -103,6 +109,16 @@ export default function LandingPage() {
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* [추가] 성함 입력창 */}
+            <input 
+              type="text" 
+              placeholder="성함" 
+              required
+              className="w-full px-6 py-4 rounded-xl bg-black border border-gray-700 text-white text-lg focus:border-yellow-500 outline-none transition-all"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            {/* [기존] 이메일 입력창 */}
             <input 
               type="email" 
               placeholder="자료를 받을 이메일 주소 입력" 
@@ -110,6 +126,15 @@ export default function LandingPage() {
               className="w-full px-6 py-4 rounded-xl bg-black border border-gray-700 text-white text-lg focus:border-yellow-500 outline-none transition-all"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+            {/* [추가] 전화번호 입력창 */}
+            <input 
+              type="tel" 
+              placeholder="전화번호 (예: 010-1234-5678)" 
+              required
+              className="w-full px-6 py-4 rounded-xl bg-black border border-gray-700 text-white text-lg focus:border-yellow-500 outline-none transition-all"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
             />
             <button 
               type="submit"
